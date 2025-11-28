@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>9-Slice Spritesheet Builder</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "panner-zoomer": "./node_modules/panner-zoomer/panner-zoomer.js",
+        "nine-slice": "./nine-slice.js"
+      }
+    }
+  </script>
+</head>
+<body>
+
+<div class="section">
+  <h2>🎨 Source Image</h2>
+  <div class="info-box">
+    <strong>Instructions:</strong><br>
+    • Click "Add Widget" to create a selection<br>
+    • <strong>Drag red box body</strong> to move the entire widget<br>
+    • <strong>Drag blue box body</strong> to reposition it within red<br>
+    • <strong>Resize red</strong> to adjust extraction area (blue stays in place)<br>
+    • <strong>Resize blue</strong> to adjust 9-slice borders<br>
+    • Click "Generate Spritesheet" when done
+  </div>
+
+  <div class="controls">
+    <button id="load-image">🖼️ Load Image</button>
+    <button id="load-widgets">📂 Load Widgets</button>
+    <button id="save-widgets">💾 Save Widgets</button>
+    <button id="add-widget">➕ Add Widget</button>
+    <button id="clear-widgets">🗑️ Clear Widgets</button>
+    <button id="generate-spritesheet">🎯 Generate Spritesheet</button>
+  </div>
+
+  <input type="file" id="image-input" accept="image/*" style="display: none;">
+  <input type="file" id="widgets-input" accept=".json,application/json" style="display: none;">
+
+  <style>
+      panner-zoomer {
+          display: block;
+          width: 100%;
+          height: 50vh;
+          background: #f0f0f0;
+      }
+  </style>
+
+  <panner-zoomer id="pz">
+    <div id="container" style="min-height: 32rem;">
+      <img id="main-image" src="example.png" alt="Base Image">
+    </div>
+  </panner-zoomer>
+
+</div>
+
+<div class="section">
+  <h2>🎭 Widget Preview</h2>
+  <div class="info-box">
+    <strong>Test your 9-slice widgets:</strong><br>
+    • Drag the resize handle in the bottom-right corner of each preview<br>
+    • Watch how the borders scale perfectly while corners remain crisp<br>
+    • Generate the spritesheet first to see previews
+  </div>
+
+  <div id="preview-container" class="preview-container">
+    <p style="color: #666; font-style: italic;">Generate spritesheet to see widget previews...</p>
+  </div>
+</div>
+
+<div class="section">
+  <h2>📦 Output Spritesheet</h2>
+
+  <div class="controls">
+    <button id="save-spritesheet">💾 Spritesheet (PNG)</button>
+    <button id="save-stylesheet">📄 Stylesheet (CSS)</button>
+    <button id="save-shell">🔧 Shell Script (SH)</button>
+    <button id="save-json">📋 Coordinates (JSON)</button>
+    <button id="copy-css">📋 Copy CSS</button>
+  </div>
+
+  <div id="spritesheet-container">
+    <canvas id="spritesheet"></canvas>
+  </div>
+
+  <h3>Generated CSS</h3>
+  <pre id="output">/* Click "Generate Spritesheet" to create CSS */</pre>
+</div>
+
+<script type="module">
+  import 'panner-zoomer';
+  import 'nine-slice';
+
+  const pz = document.getElementById('pz');
+  pz.setPanOnContent(true);
+  console.log(pz);
+
+</script>
+
+</body>
+</html>

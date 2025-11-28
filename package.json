@@ -1,0 +1,31 @@
+{
+  "private": true,
+  "name": "auto-slice",
+  "version": "1.0.0",
+  "description": "Auto Slicer",
+  "main": "auto-slice.js",
+  "scripts": {
+    "save": "git add .; git commit -m 'Updated Release'; npm version patch; npm publish; git push --follow-tags;",
+    "server": "http-server -c-1 -o .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "module",
+  "author": "catpea (https://github.com/catpea)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/catpea/auto-slice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/catpea/auto-slice/issues"
+  },
+  "homepage": "https://catpea.github.io/auto-slice",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/catpea"
+  },
+  "dependencies": {
+    "panner-zoomer": "^1.0.2"
+  }
+}
