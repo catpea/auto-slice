@@ -18,6 +18,22 @@ function getTolerance() {
 }
 
 /**
+ * Get minimum gap settings from window.gridSettings or use defaults.
+ *
+ * @returns {Object} - {minXGap, minYGap}
+ */
+function getMinGaps() {
+  return {
+    minXGap: (typeof window !== 'undefined' && window.gridSettings?.minXGap !== undefined)
+      ? window.gridSettings.minXGap
+      : 50,
+    minYGap: (typeof window !== 'undefined' && window.gridSettings?.minYGap !== undefined)
+      ? window.gridSettings.minYGap
+      : 50
+  };
+}
+
+/**
  * Detect grid configuration from an image.
  * Analyzes pixel rows and columns for consistent divider patterns.
  *
@@ -27,25 +43,42 @@ function getTolerance() {
 export function detectGrid(imageData) {
   const { width, height, data } = imageData;
   const tolerance = getTolerance();
+  const { minXGap, minYGap } = getMinGaps();
+
+  // Detect outer borders (frame around the entire image)
+  const outerBorders = detectOuterBorders(data, width, height, tolerance);
 
   const horizontalLineGroups = findHorizontalDividers(data, width, height, tolerance);
   const verticalLineGroups = findVerticalDividers(data, width, height, tolerance);
 
-  const horizontalSlices = horizontalLineGroups.map(g => g.center);
-  const verticalSlices = verticalLineGroups.map(g => g.center);
+  // Refine centers to be perfectly aligned
+  const refinedHorizontalGroups = refineDividerCenters(horizontalLineGroups);
+  const refinedVerticalGroups = refineDividerCenters(verticalLineGroups);
 
-  const cells = computeCells(horizontalSlices, verticalSlices, width, height);
-  const gridLineSegments = computeGridLineSegments(horizontalLineGroups, verticalLineGroups, width, height);
+  // Apply minimum gap filtering
+  const filteredHorizontalGroups = enforceMinimumGap(refinedHorizontalGroups, minYGap);
+  const filteredVerticalGroups = enforceMinimumGap(refinedVerticalGroups, minXGap);
+
+  const horizontalSlices = filteredHorizontalGroups.map(g => g.center);
+  const verticalSlices = filteredVerticalGroups.map(g => g.center);
+
+  const cells = computeCells(horizontalSlices, verticalSlices, width, height, outerBorders);
+  const gridLineSegments = computeGridLineSegments(filteredHorizontalGroups, filteredVerticalGroups, width, height);
 
   // Debug logging
   if (window.debug) {
     window.debug.log('Grid detection details', {
       imageSize: `${width}×${height}`,
-      horizontalDividers: horizontalLineGroups.length,
-      verticalDividers: verticalLineGroups.length,
+      outerBorders: outerBorders,
+      horizontalDividersRaw: horizontalLineGroups.length,
+      horizontalDividersFiltered: filteredHorizontalGroups.length,
+      verticalDividersRaw: verticalLineGroups.length,
+      verticalDividersFiltered: filteredVerticalGroups.length,
       horizontalSlices: horizontalSlices,
       verticalSlices: verticalSlices,
-      tolerance: tolerance
+      tolerance: tolerance,
+      minXGap: minXGap,
+      minYGap: minYGap
     });
   }
 
@@ -54,11 +87,64 @@ export function detectGrid(imageData) {
     columns: verticalSlices.length + 1,
     horizontalSlices: horizontalSlices,
     verticalSlices: verticalSlices,
-    horizontalLineGroups: horizontalLineGroups,
-    verticalLineGroups: verticalLineGroups,
+    horizontalLineGroups: filteredHorizontalGroups,
+    verticalLineGroups: filteredVerticalGroups,
     cells: cells,
-    gridLineSegments: gridLineSegments
+    gridLineSegments: gridLineSegments,
+    outerBorders: outerBorders
   };
+}
+
+/**
+ * Detect outer borders (frame) around the entire image.
+ * These are uniform edges that should be excluded from cell content.
+ *
+ * @param {Uint8ClampedArray} data - Pixel data (RGBA)
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @param {number} tolerance - Color tolerance
+ * @returns {Object} - {top, right, bottom, left} border widths in pixels
+ */
+function detectOuterBorders(data, width, height, tolerance) {
+  const borders = { top: 0, right: 0, bottom: 0, left: 0 };
+
+  // Detect top border
+  for (let y = 0; y < height; y++) {
+    if (isUniformRow(data, width, height, y, tolerance)) {
+      borders.top = y + 1;
+    } else {
+      break;
+    }
+  }
+
+  // Detect bottom border
+  for (let y = height - 1; y >= 0; y--) {
+    if (isUniformRow(data, width, height, y, tolerance)) {
+      borders.bottom = height - y;
+    } else {
+      break;
+    }
+  }
+
+  // Detect left border
+  for (let x = 0; x < width; x++) {
+    if (isUniformColumn(data, width, height, x, tolerance)) {
+      borders.left = x + 1;
+    } else {
+      break;
+    }
+  }
+
+  // Detect right border
+  for (let x = width - 1; x >= 0; x--) {
+    if (isUniformColumn(data, width, height, x, tolerance)) {
+      borders.right = width - x;
+    } else {
+      break;
+    }
+  }
+
+  return borders;
 }
 
 /**
@@ -208,6 +294,7 @@ function colorsMatch(r1, g1, b1, a1, r2, g2, b2, a2, tolerance) {
 /**
  * Consolidate consecutive divider lines into groups.
  * Multiple uniform rows/columns in sequence become one group with start, end, and center.
+ * Center is calculated as the true midpoint for proper alignment.
  *
  * @param {number[]} dividers - Array of divider coordinates
  * @returns {Array} - Array of group objects {start, end, center, width}
@@ -223,10 +310,12 @@ function consolidateDividersToGroups(dividers) {
     if (dividers[i] === groupEnd + 1) {
       groupEnd = dividers[i];
     } else {
+      // Use precise center calculation (including fractional pixels)
+      const preciseCenter = (groupStart + groupEnd) / 2;
       groups.push({
         start: groupStart,
         end: groupEnd,
-        center: Math.floor((groupStart + groupEnd) / 2),
+        center: Math.round(preciseCenter), // Round to nearest pixel for consistent centering
         width: groupEnd - groupStart + 1
       });
       groupStart = dividers[i];
@@ -234,10 +323,12 @@ function consolidateDividersToGroups(dividers) {
     }
   }
 
+  // Add final group
+  const preciseCenter = (groupStart + groupEnd) / 2;
   groups.push({
     start: groupStart,
     end: groupEnd,
-    center: Math.floor((groupStart + groupEnd) / 2),
+    center: Math.round(preciseCenter),
     width: groupEnd - groupStart + 1
   });
 
@@ -245,20 +336,99 @@ function consolidateDividersToGroups(dividers) {
 }
 
 /**
+ * Refine divider centers for perfect alignment.
+ * Ensures the center is the true geometric midpoint of the divider.
+ *
+ * @param {Array} lineGroups - Array of line group objects
+ * @returns {Array} - Line groups with refined centers
+ */
+function refineDividerCenters(lineGroups) {
+  return lineGroups.map(group => {
+    // For even-width dividers, ensure consistent rounding
+    // For odd-width dividers, center is naturally at a pixel
+    const exactCenter = (group.start + group.end) / 2;
+
+    return {
+      ...group,
+      center: Math.round(exactCenter),
+      exactCenter: exactCenter // Keep precise value for debugging
+    };
+  });
+}
+
+/**
+ * Enforce minimum gap between detected grid lines.
+ * When lines are too close together, keep the thickest/most prominent one.
+ *
+ * @param {Array} lineGroups - Array of line group objects
+ * @param {number} minGap - Minimum gap in pixels
+ * @returns {Array} - Filtered line groups
+ */
+function enforceMinimumGap(lineGroups, minGap) {
+  if (lineGroups.length === 0) return [];
+
+  const filtered = [];
+  let lastKept = null;
+
+  for (let i = 0; i < lineGroups.length; i++) {
+    const current = lineGroups[i];
+
+    // First line always gets added
+    if (lastKept === null) {
+      filtered.push(current);
+      lastKept = current;
+      continue;
+    }
+
+    // Check distance from last kept line
+    const distance = current.center - lastKept.center;
+
+    if (distance >= minGap) {
+      // Far enough - keep this line
+      filtered.push(current);
+      lastKept = current;
+    } else {
+      // Too close - compare which one is better
+      // Prefer thicker lines (more uniform pixels)
+      if (current.width > lastKept.width) {
+        // Replace the last kept line with this one
+        filtered[filtered.length - 1] = current;
+        lastKept = current;
+      }
+      // Otherwise, skip this line (keep the previous one)
+    }
+  }
+
+  if (window.debug && lineGroups.length !== filtered.length) {
+    window.debug.log(`Filtered out ${lineGroups.length - filtered.length} duplicate lines (minGap: ${minGap}px)`);
+  }
+
+  return filtered;
+}
+
+/**
  * Compute cell boundaries from slice lines.
+ * Trims outer borders to exclude frame pixels from cell content.
  *
  * @param {number[]} horizontalLines - Y coordinates of horizontal slices
  * @param {number[]} verticalLines - X coordinates of vertical slices
  * @param {number} width - Image width
  * @param {number} height - Image height
+ * @param {Object} outerBorders - Detected outer border widths
  * @returns {Array} - Array of cell objects with x, y, width, height
  */
-function computeCells(horizontalLines, verticalLines, width, height) {
+function computeCells(horizontalLines, verticalLines, width, height, outerBorders) {
   const cells = [];
 
-  // Add boundaries (0 and max dimensions)
-  const yBoundaries = [0, ...horizontalLines, height];
-  const xBoundaries = [0, ...verticalLines, width];
+  // Use outer borders as boundaries instead of 0
+  const contentLeft = outerBorders.left;
+  const contentTop = outerBorders.top;
+  const contentRight = width - outerBorders.right;
+  const contentBottom = height - outerBorders.bottom;
+
+  // Add boundaries (content area edges and internal dividers)
+  const yBoundaries = [contentTop, ...horizontalLines, contentBottom];
+  const xBoundaries = [contentLeft, ...verticalLines, contentRight];
 
   // Create cells from boundaries
   for (let row = 0; row < yBoundaries.length - 1; row++) {
