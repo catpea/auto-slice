@@ -3,102 +3,331 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>9-Slice Spritesheet Builder</title>
-  <link rel="stylesheet" href="styles.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "panner-zoomer": "./node_modules/panner-zoomer/panner-zoomer.js",
-        "nine-slice": "./nine-slice.js"
-      }
+  <title>Image Grid Analyzer</title>
+  <style>
+    * {
+      box-sizing: border-box;
     }
-  </script>
+
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+    }
+
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+    }
+
+    h2 {
+      margin: 0 0 15px;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin: 20px 0 10px;
+      font-size: 16px;
+      color: #4a9eff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #4a9eff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #3a8eef;
+    }
+
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+
+    .editor-container {
+      border: 1px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .output-panel {
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    pre {
+      background: #0a0a0a;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+      max-height: 300px;
+    }
+
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .component-preview {
+      background: #2a2a2a;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .component-preview canvas {
+      max-width: 100%;
+      image-rendering: pixelated;
+      background: repeating-conic-gradient(#333 0% 25%, #222 0% 50%) 50% / 10px 10px;
+    }
+
+    .component-preview p {
+      margin: 10px 0 0;
+      font-size: 11px;
+      color: #888;
+    }
+
+    .stats {
+      background: #0a0a0a;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      color: #4a9eff;
+      font-weight: bold;
+    }
+
+    .section-divider {
+      border: 0;
+      border-top: 1px solid #333;
+      margin: 30px 0;
+    }
+  </style>
 </head>
 <body>
+  <div class="app-container">
+    <h1>🔍 Image Grid Analyzer</h1>
 
-<div class="section">
-  <h2>🎨 Source Image</h2>
-  <div class="info-box">
-    <strong>Instructions:</strong><br>
-    • Click "Add Widget" to create a selection<br>
-    • <strong>Drag red box body</strong> to move the entire widget<br>
-    • <strong>Drag blue box body</strong> to reposition it within red<br>
-    • <strong>Resize red</strong> to adjust extraction area (blue stays in place)<br>
-    • <strong>Resize blue</strong> to adjust 9-slice borders<br>
-    • Click "Generate Spritesheet" when done
-  </div>
-
-  <div class="controls">
-    <button id="load-image">🖼️ Load Image</button>
-    <button id="load-widgets">📂 Load Widgets</button>
-    <button id="save-widgets">💾 Save Widgets</button>
-    <button id="add-widget">➕ Add Widget</button>
-    <button id="clear-widgets">🗑️ Clear Widgets</button>
-    <button id="generate-spritesheet">🎯 Generate Spritesheet</button>
-  </div>
-
-  <input type="file" id="image-input" accept="image/*" style="display: none;">
-  <input type="file" id="widgets-input" accept=".json,application/json" style="display: none;">
-
-  <style>
-      panner-zoomer {
-          display: block;
-          width: 100%;
-          height: 50vh;
-          background: #f0f0f0;
-      }
-  </style>
-
-  <panner-zoomer id="pz">
-    <div id="container" style="min-height: 32rem;">
-      <img id="main-image" src="example.png" alt="Base Image">
+    <div class="toolbar">
+      <input type="file" id="file-input" accept="image/*" hidden>
+      <button id="load-btn">🖼️ Load Image</button>
+      <button id="analyze-btn" disabled>🔬 Analyze Grid</button>
+      <button id="export-btn" disabled>💾 Export All</button>
     </div>
-  </panner-zoomer>
 
-</div>
+    <div class="editor-container" id="editor"></div>
 
-<div class="section">
-  <h2>🎭 Widget Preview</h2>
-  <div class="info-box">
-    <strong>Test your 9-slice widgets:</strong><br>
-    • Drag the resize handle in the bottom-right corner of each preview<br>
-    • Watch how the borders scale perfectly while corners remain crisp<br>
-    • Generate the spritesheet first to see previews
+    <div class="output-panel" id="output" hidden>
+      <h2>📊 Analysis Results</h2>
+
+      <div class="stats" id="stats"></div>
+
+      <hr class="section-divider">
+
+      <h3>🎯 Grid Line Segments</h3>
+      <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+        Detected grid lines extracted and analyzed for patterns
+      </p>
+      <div class="component-grid" id="grid-lines"></div>
+
+      <hr class="section-divider">
+
+      <h3>📦 Cell Components</h3>
+      <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+        Grid cells extracted and prepared for nine-slice scaling
+      </p>
+      <div class="component-grid" id="components"></div>
+
+      <hr class="section-divider">
+
+      <h3>📄 JSON Output</h3>
+      <pre id="json-output"></pre>
+
+      <h3 style="margin-top: 30px;">🎨 CSS Output</h3>
+      <pre id="css-output"></pre>
+    </div>
   </div>
 
-  <div id="preview-container" class="preview-container">
-    <p style="color: #666; font-style: italic;">Generate spritesheet to see widget previews...</p>
-  </div>
-</div>
+  <script type="module">
+    import { ImageGridAnalyzer } from './index.js';
+    import { exportToJSON } from './json-exporter.js';
+    import { exportToCSS } from './css-exporter.js';
 
-<div class="section">
-  <h2>📦 Output Spritesheet</h2>
+    const app = new ImageGridAnalyzer(document.getElementById('editor'));
 
-  <div class="controls">
-    <button id="save-spritesheet">💾 Spritesheet (PNG)</button>
-    <button id="save-stylesheet">📄 Stylesheet (CSS)</button>
-    <button id="save-shell">🔧 Shell Script (SH)</button>
-    <button id="save-json">📋 Coordinates (JSON)</button>
-    <button id="copy-css">📋 Copy CSS</button>
-  </div>
+    document.getElementById('load-btn').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
 
-  <div id="spritesheet-container">
-    <canvas id="spritesheet"></canvas>
-  </div>
+    document.getElementById('file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        await app.loadImage(file);
+        document.getElementById('analyze-btn').disabled = false;
+      }
+    });
 
-  <h3>Generated CSS</h3>
-  <pre id="output">/* Click "Generate Spritesheet" to create CSS */</pre>
-</div>
+    document.getElementById('analyze-btn').addEventListener('click', () => {
+      const results = app.analyze();
+      displayResults(results);
+      document.getElementById('export-btn').disabled = false;
+    });
 
-<script type="module">
-  import 'panner-zoomer';
-  import 'nine-slice';
+    document.getElementById('export-btn').addEventListener('click', async () => {
+      const exports = await app.export();
 
-  const pz = document.getElementById('pz');
-  pz.setPanOnContent(true);
-  console.log(pz);
+      // Download files
+      downloadFile('components.json', exports.json, 'application/json');
+      downloadFile('components.css', exports.css, 'text/css');
 
-</script>
+      for (const png of exports.pngBlobs) {
+        downloadBlob(`${png.name}.png`, png.blob);
+      }
+    });
 
+    function displayResults(results) {
+      document.getElementById('output').hidden = false;
+
+      // Show stats
+      const statsContainer = document.getElementById('stats');
+      statsContainer.innerHTML = `
+        <div class="stat-item">
+          <div class="stat-label">Grid Configuration</div>
+          <div class="stat-value">${results.gridConfig.rows}×${results.gridConfig.columns}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Grid Line Segments</div>
+          <div class="stat-value">${results.gridLineComponents.length}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Cell Components</div>
+          <div class="stat-value">${results.components.length}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Total Shapes Detected</div>
+          <div class="stat-value">${countTotalShapes(results)}</div>
+        </div>
+      `;
+
+      // Show grid line segments
+      const gridLinesContainer = document.getElementById('grid-lines');
+      gridLinesContainer.innerHTML = '';
+
+      for (const component of results.gridLineComponents) {
+        const preview = createComponentPreview(component);
+        gridLinesContainer.appendChild(preview);
+      }
+
+      // Show cell components
+      const componentsContainer = document.getElementById('components');
+      componentsContainer.innerHTML = '';
+
+      for (const component of results.components) {
+        const preview = createComponentPreview(component);
+        componentsContainer.appendChild(preview);
+      }
+
+      // Show JSON
+      const allComponents = [...results.gridLineComponents, ...results.components];
+      const jsonOutput = exportToJSON(results.gridConfig, allComponents);
+      document.getElementById('json-output').textContent = jsonOutput;
+
+      // Show CSS
+      const cssOutput = exportToCSS(results.components);
+      document.getElementById('css-output').textContent = cssOutput;
+    }
+
+    function createComponentPreview(component) {
+      const preview = document.createElement('div');
+      preview.className = 'component-preview';
+
+      const canvas = document.createElement('canvas');
+      canvas.width = component.width;
+      canvas.height = component.height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.putImageData(component.imageData, 0, 0);
+
+      const label = document.createElement('p');
+      label.textContent = `${component.name}`;
+
+      const dimensions = document.createElement('p');
+      dimensions.textContent = `${component.width}×${component.height}`;
+      dimensions.style.fontSize = '10px';
+      dimensions.style.color = '#666';
+      dimensions.style.margin = '5px 0 0';
+
+      preview.appendChild(canvas);
+      preview.appendChild(label);
+      preview.appendChild(dimensions);
+
+      return preview;
+    }
+
+    function countTotalShapes(results) {
+      let count = 0;
+      for (const component of [...results.gridLineComponents, ...results.components]) {
+        count += component.shapes.length;
+      }
+      return count;
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      downloadBlob(filename, blob);
+    }
+
+    function downloadBlob(filename, blob) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
 </body>
 </html>

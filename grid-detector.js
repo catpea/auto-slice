@@ -1,0 +1,274 @@
+/**
+ * Grid Detector Module
+ * Automatically detect where slice lines exist in an image grid.
+ */
+
+/**
+ * Detect grid configuration from an image.
+ * Analyzes pixel rows and columns for consistent divider patterns.
+ *
+ * @param {ImageData} imageData - Canvas image data
+ * @returns {GridConfig} - Detected grid configuration
+ */
+export function detectGrid(imageData) {
+  const { width, height, data } = imageData;
+
+  const horizontalLineGroups = findHorizontalDividers(data, width, height);
+  const verticalLineGroups = findVerticalDividers(data, width, height);
+
+  const horizontalSlices = horizontalLineGroups.map(g => g.center);
+  const verticalSlices = verticalLineGroups.map(g => g.center);
+
+  const cells = computeCells(horizontalSlices, verticalSlices, width, height);
+  const gridLineSegments = computeGridLineSegments(horizontalLineGroups, verticalLineGroups, width, height);
+
+  return {
+    rows: horizontalSlices.length + 1,
+    columns: verticalSlices.length + 1,
+    horizontalSlices: horizontalSlices,
+    verticalSlices: verticalSlices,
+    horizontalLineGroups: horizontalLineGroups,
+    verticalLineGroups: verticalLineGroups,
+    cells: cells,
+    gridLineSegments: gridLineSegments
+  };
+}
+
+/**
+ * Find horizontal divider lines by analyzing row uniformity.
+ * A divider is a row where all pixels share the same color (or transparency).
+ *
+ * @param {Uint8ClampedArray} data - Pixel data (RGBA)
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @returns {Array} - Array of line group objects {start, end, center}
+ */
+function findHorizontalDividers(data, width, height) {
+  const dividers = [];
+
+  for (let y = 0; y < height; y++) {
+    if (isUniformRow(data, width, height, y)) {
+      dividers.push(y);
+    }
+  }
+
+  return consolidateDividersToGroups(dividers);
+}
+
+/**
+ * Find vertical divider lines by analyzing column uniformity.
+ *
+ * @param {Uint8ClampedArray} data - Pixel data (RGBA)
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @returns {Array} - Array of line group objects {start, end, center}
+ */
+function findVerticalDividers(data, width, height) {
+  const dividers = [];
+
+  for (let x = 0; x < width; x++) {
+    if (isUniformColumn(data, width, height, x)) {
+      dividers.push(x);
+    }
+  }
+
+  return consolidateDividersToGroups(dividers);
+}
+
+/**
+ * Check if a row has uniform color (potential divider).
+ *
+ * @param {Uint8ClampedArray} data - Pixel data
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @param {number} y - Row index
+ * @returns {boolean} - True if row is uniform
+ */
+function isUniformRow(data, width, height, y) {
+  const startIndex = y * width * 4;
+  const firstPixel = {
+    r: data[startIndex],
+    g: data[startIndex + 1],
+    b: data[startIndex + 2],
+    a: data[startIndex + 3]
+  };
+
+  for (let x = 1; x < width; x++) {
+    const index = (y * width + x) * 4;
+    if (
+      data[index] !== firstPixel.r ||
+      data[index + 1] !== firstPixel.g ||
+      data[index + 2] !== firstPixel.b ||
+      data[index + 3] !== firstPixel.a
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Check if a column has uniform color (potential divider).
+ *
+ * @param {Uint8ClampedArray} data - Pixel data
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @param {number} x - Column index
+ * @returns {boolean} - True if column is uniform
+ */
+function isUniformColumn(data, width, height, x) {
+  const firstIndex = x * 4;
+  const firstPixel = {
+    r: data[firstIndex],
+    g: data[firstIndex + 1],
+    b: data[firstIndex + 2],
+    a: data[firstIndex + 3]
+  };
+
+  for (let y = 1; y < height; y++) {
+    const index = (y * width + x) * 4;
+    if (
+      data[index] !== firstPixel.r ||
+      data[index + 1] !== firstPixel.g ||
+      data[index + 2] !== firstPixel.b ||
+      data[index + 3] !== firstPixel.a
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Consolidate consecutive divider lines into groups.
+ * Multiple uniform rows/columns in sequence become one group with start, end, and center.
+ *
+ * @param {number[]} dividers - Array of divider coordinates
+ * @returns {Array} - Array of group objects {start, end, center, width}
+ */
+function consolidateDividersToGroups(dividers) {
+  if (dividers.length === 0) return [];
+
+  const groups = [];
+  let groupStart = dividers[0];
+  let groupEnd = dividers[0];
+
+  for (let i = 1; i < dividers.length; i++) {
+    if (dividers[i] === groupEnd + 1) {
+      groupEnd = dividers[i];
+    } else {
+      groups.push({
+        start: groupStart,
+        end: groupEnd,
+        center: Math.floor((groupStart + groupEnd) / 2),
+        width: groupEnd - groupStart + 1
+      });
+      groupStart = dividers[i];
+      groupEnd = dividers[i];
+    }
+  }
+
+  groups.push({
+    start: groupStart,
+    end: groupEnd,
+    center: Math.floor((groupStart + groupEnd) / 2),
+    width: groupEnd - groupStart + 1
+  });
+
+  return groups;
+}
+
+/**
+ * Compute cell boundaries from slice lines.
+ *
+ * @param {number[]} horizontalLines - Y coordinates of horizontal slices
+ * @param {number[]} verticalLines - X coordinates of vertical slices
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @returns {Array} - Array of cell objects with x, y, width, height
+ */
+function computeCells(horizontalLines, verticalLines, width, height) {
+  const cells = [];
+
+  // Add boundaries (0 and max dimensions)
+  const yBoundaries = [0, ...horizontalLines, height];
+  const xBoundaries = [0, ...verticalLines, width];
+
+  // Create cells from boundaries
+  for (let row = 0; row < yBoundaries.length - 1; row++) {
+    for (let col = 0; col < xBoundaries.length - 1; col++) {
+      const y = yBoundaries[row];
+      const nextY = yBoundaries[row + 1];
+      const x = xBoundaries[col];
+      const nextX = xBoundaries[col + 1];
+
+      cells.push({
+        type: 'cell',
+        row: row,
+        col: col,
+        x: x,
+        y: y,
+        width: nextX - x,
+        height: nextY - y
+      });
+    }
+  }
+
+  return cells;
+}
+
+/**
+ * Compute grid line segments to be analyzed separately.
+ *
+ * @param {Array} horizontalLineGroups - Horizontal line groups
+ * @param {Array} verticalLineGroups - Vertical line groups
+ * @param {number} width - Image width
+ * @param {number} height - Image height
+ * @returns {Array} - Array of grid line segment objects
+ */
+function computeGridLineSegments(horizontalLineGroups, verticalLineGroups, width, height) {
+  const segments = [];
+  let segmentId = 0;
+
+  // Horizontal line segments
+  for (const lineGroup of horizontalLineGroups) {
+    segments.push({
+      id: `h-line-${segmentId++}`,
+      type: 'horizontal-line',
+      x: 0,
+      y: lineGroup.start,
+      width: width,
+      height: lineGroup.width
+    });
+  }
+
+  // Vertical line segments
+  for (const lineGroup of verticalLineGroups) {
+    segments.push({
+      id: `v-line-${segmentId++}`,
+      type: 'vertical-line',
+      x: lineGroup.start,
+      y: 0,
+      width: lineGroup.width,
+      height: height
+    });
+  }
+
+  // Intersection segments (where horizontal and vertical lines cross)
+  for (const hGroup of horizontalLineGroups) {
+    for (const vGroup of verticalLineGroups) {
+      segments.push({
+        id: `intersection-${segmentId++}`,
+        type: 'intersection',
+        x: vGroup.start,
+        y: hGroup.start,
+        width: vGroup.width,
+        height: hGroup.width
+      });
+    }
+  }
+
+  return segments;
+}

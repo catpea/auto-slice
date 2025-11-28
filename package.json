@@ -2,14 +2,20 @@
   "private": true,
   "name": "auto-slice",
   "version": "1.0.0",
-  "description": "Auto Slicer",
-  "main": "auto-slice.js",
+  "description": "Image Grid Analyzer - Automatic nine-slice component extractor with no external dependencies",
+  "main": "index.js",
   "scripts": {
     "save": "git add .; git commit -m 'Updated Release'; npm version patch; npm publish; git push --follow-tags;",
     "server": "http-server -c-1 -o .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "nine-slice",
+    "image-analysis",
+    "grid-detection",
+    "ui-components",
+    "pixel-art"
+  ],
   "type": "module",
   "author": "catpea (https://github.com/catpea)",
   "license": "MIT",
@@ -26,6 +32,6 @@
     "url": "https://github.com/sponsors/catpea"
   },
   "dependencies": {
-    "panner-zoomer": "^1.0.2"
+    "ws": "^8.18.3"
   }
 }
