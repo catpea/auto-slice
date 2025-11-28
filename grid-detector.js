@@ -3,6 +3,20 @@
  * Automatically detect where slice lines exist in an image grid.
  */
 
+// Default color difference tolerance for JPEG artifacts (0-255 per channel)
+const DEFAULT_COLOR_TOLERANCE = 5;
+
+/**
+ * Get current tolerance setting from window.gridSettings or use default.
+ *
+ * @returns {number} - Current tolerance value
+ */
+function getTolerance() {
+  return (typeof window !== 'undefined' && window.gridSettings?.tolerance !== undefined)
+    ? window.gridSettings.tolerance
+    : DEFAULT_COLOR_TOLERANCE;
+}
+
 /**
  * Detect grid configuration from an image.
  * Analyzes pixel rows and columns for consistent divider patterns.
@@ -12,15 +26,28 @@
  */
 export function detectGrid(imageData) {
   const { width, height, data } = imageData;
+  const tolerance = getTolerance();
 
-  const horizontalLineGroups = findHorizontalDividers(data, width, height);
-  const verticalLineGroups = findVerticalDividers(data, width, height);
+  const horizontalLineGroups = findHorizontalDividers(data, width, height, tolerance);
+  const verticalLineGroups = findVerticalDividers(data, width, height, tolerance);
 
   const horizontalSlices = horizontalLineGroups.map(g => g.center);
   const verticalSlices = verticalLineGroups.map(g => g.center);
 
   const cells = computeCells(horizontalSlices, verticalSlices, width, height);
   const gridLineSegments = computeGridLineSegments(horizontalLineGroups, verticalLineGroups, width, height);
+
+  // Debug logging
+  if (window.debug) {
+    window.debug.log('Grid detection details', {
+      imageSize: `${width}×${height}`,
+      horizontalDividers: horizontalLineGroups.length,
+      verticalDividers: verticalLineGroups.length,
+      horizontalSlices: horizontalSlices,
+      verticalSlices: verticalSlices,
+      tolerance: tolerance
+    });
+  }
 
   return {
     rows: horizontalSlices.length + 1,
@@ -36,20 +63,25 @@ export function detectGrid(imageData) {
 
 /**
  * Find horizontal divider lines by analyzing row uniformity.
- * A divider is a row where all pixels share the same color (or transparency).
+ * A divider is a row where all pixels share similar colors (within tolerance).
  *
  * @param {Uint8ClampedArray} data - Pixel data (RGBA)
  * @param {number} width - Image width
  * @param {number} height - Image height
+ * @param {number} tolerance - Color tolerance
  * @returns {Array} - Array of line group objects {start, end, center}
  */
-function findHorizontalDividers(data, width, height) {
+function findHorizontalDividers(data, width, height, tolerance) {
   const dividers = [];
 
   for (let y = 0; y < height; y++) {
-    if (isUniformRow(data, width, height, y)) {
+    if (isUniformRow(data, width, height, y, tolerance)) {
       dividers.push(y);
     }
+  }
+
+  if (window.debug && dividers.length > 0) {
+    window.debug.log(`Found ${dividers.length} uniform horizontal rows`);
   }
 
   return consolidateDividersToGroups(dividers);
@@ -61,15 +93,20 @@ function findHorizontalDividers(data, width, height) {
  * @param {Uint8ClampedArray} data - Pixel data (RGBA)
  * @param {number} width - Image width
  * @param {number} height - Image height
+ * @param {number} tolerance - Color tolerance
  * @returns {Array} - Array of line group objects {start, end, center}
  */
-function findVerticalDividers(data, width, height) {
+function findVerticalDividers(data, width, height, tolerance) {
   const dividers = [];
 
   for (let x = 0; x < width; x++) {
-    if (isUniformColumn(data, width, height, x)) {
+    if (isUniformColumn(data, width, height, x, tolerance)) {
       dividers.push(x);
     }
+  }
+
+  if (window.debug && dividers.length > 0) {
+    window.debug.log(`Found ${dividers.length} uniform vertical columns`);
   }
 
   return consolidateDividersToGroups(dividers);
@@ -77,14 +114,16 @@ function findVerticalDividers(data, width, height) {
 
 /**
  * Check if a row has uniform color (potential divider).
+ * Uses tolerance to handle JPEG compression artifacts.
  *
  * @param {Uint8ClampedArray} data - Pixel data
  * @param {number} width - Image width
  * @param {number} height - Image height
  * @param {number} y - Row index
+ * @param {number} tolerance - Color tolerance
  * @returns {boolean} - True if row is uniform
  */
-function isUniformRow(data, width, height, y) {
+function isUniformRow(data, width, height, y, tolerance) {
   const startIndex = y * width * 4;
   const firstPixel = {
     r: data[startIndex],
@@ -95,12 +134,13 @@ function isUniformRow(data, width, height, y) {
 
   for (let x = 1; x < width; x++) {
     const index = (y * width + x) * 4;
-    if (
-      data[index] !== firstPixel.r ||
-      data[index + 1] !== firstPixel.g ||
-      data[index + 2] !== firstPixel.b ||
-      data[index + 3] !== firstPixel.a
-    ) {
+
+    // Check color difference with tolerance
+    if (!colorsMatch(
+      firstPixel.r, firstPixel.g, firstPixel.b, firstPixel.a,
+      data[index], data[index + 1], data[index + 2], data[index + 3],
+      tolerance
+    )) {
       return false;
     }
   }
@@ -110,14 +150,16 @@ function isUniformRow(data, width, height, y) {
 
 /**
  * Check if a column has uniform color (potential divider).
+ * Uses tolerance to handle JPEG compression artifacts.
  *
  * @param {Uint8ClampedArray} data - Pixel data
  * @param {number} width - Image width
  * @param {number} height - Image height
  * @param {number} x - Column index
+ * @param {number} tolerance - Color tolerance
  * @returns {boolean} - True if column is uniform
  */
-function isUniformColumn(data, width, height, x) {
+function isUniformColumn(data, width, height, x, tolerance) {
   const firstIndex = x * 4;
   const firstPixel = {
     r: data[firstIndex],
@@ -128,17 +170,39 @@ function isUniformColumn(data, width, height, x) {
 
   for (let y = 1; y < height; y++) {
     const index = (y * width + x) * 4;
-    if (
-      data[index] !== firstPixel.r ||
-      data[index + 1] !== firstPixel.g ||
-      data[index + 2] !== firstPixel.b ||
-      data[index + 3] !== firstPixel.a
-    ) {
+
+    // Check color difference with tolerance
+    if (!colorsMatch(
+      firstPixel.r, firstPixel.g, firstPixel.b, firstPixel.a,
+      data[index], data[index + 1], data[index + 2], data[index + 3],
+      tolerance
+    )) {
       return false;
     }
   }
 
   return true;
+}
+
+/**
+ * Check if two colors match within tolerance.
+ *
+ * @param {number} r1 - Red component 1
+ * @param {number} g1 - Green component 1
+ * @param {number} b1 - Blue component 1
+ * @param {number} a1 - Alpha component 1
+ * @param {number} r2 - Red component 2
+ * @param {number} g2 - Green component 2
+ * @param {number} b2 - Blue component 2
+ * @param {number} a2 - Alpha component 2
+ * @param {number} tolerance - Maximum difference per channel
+ * @returns {boolean} - True if colors match within tolerance
+ */
+function colorsMatch(r1, g1, b1, a1, r2, g2, b2, a2, tolerance) {
+  return Math.abs(r1 - r2) <= tolerance &&
+         Math.abs(g1 - g2) <= tolerance &&
+         Math.abs(b1 - b2) <= tolerance &&
+         Math.abs(a1 - a2) <= tolerance;
 }
 
 /**

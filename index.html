@@ -11,7 +11,7 @@
 
     body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
       font-family: system-ui, -apple-system, sans-serif;
       background: #121212;
       color: #e0e0e0;
@@ -20,27 +20,81 @@
     .app-container {
       max-width: 1400px;
       margin: 0 auto;
+      padding-top: 120px; /* Space for sticky toolbox */
     }
 
-    h1 {
-      margin: 0 0 20px;
+    /* Sticky Toolbox */
+    .toolbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a1a;
+      border-bottom: 2px solid #333;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
     }
 
-    h2 {
+    .toolbox-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 15px 20px;
+    }
+
+    .toolbox h1 {
       margin: 0 0 15px;
-      font-size: 18px;
-    }
-
-    h3 {
-      margin: 20px 0 10px;
-      font-size: 16px;
-      color: #4a9eff;
+      font-size: 24px;
     }
 
     .toolbar {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .settings-row {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 8px 0;
+      border-top: 1px solid #333;
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-group label {
+      font-size: 13px;
+      color: #888;
+      white-space: nowrap;
+    }
+
+    .setting-group input[type="number"] {
+      width: 70px;
+      padding: 6px 8px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .setting-group input[type="number"]:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+
+    .setting-value {
+      font-size: 13px;
+      color: #4a9eff;
+      font-weight: bold;
+      min-width: 30px;
+      text-align: center;
     }
 
     button {
@@ -60,6 +114,17 @@
     button:disabled {
       background: #666;
       cursor: not-allowed;
+    }
+
+    h2 {
+      margin: 0 0 15px;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin: 20px 0 10px;
+      font-size: 16px;
+      color: #4a9eff;
     }
 
     .editor-container {
@@ -144,49 +209,83 @@
       border-top: 1px solid #333;
       margin: 30px 0;
     }
+
+    .content-area {
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <h1>🔍 Image Grid Analyzer</h1>
+  <!-- Sticky Toolbox -->
+  <div class="toolbox">
+    <div class="toolbox-inner">
+      <h1>🔍 Image Grid Analyzer</h1>
 
-    <div class="toolbar">
-      <input type="file" id="file-input" accept="image/*" hidden>
-      <button id="load-btn">🖼️ Load Image</button>
-      <button id="analyze-btn" disabled>🔬 Analyze Grid</button>
-      <button id="export-btn" disabled>💾 Export All</button>
+      <div class="toolbar">
+        <input type="file" id="file-input" accept="image/*" hidden>
+        <button id="load-btn">🖼️ Load Image</button>
+        <button id="analyze-btn" disabled>🔬 Analyze Grid</button>
+        <button id="export-btn" disabled>💾 Export All</button>
+      </div>
+
+      <div class="settings-row">
+        <div class="setting-group">
+          <label for="tolerance">Grid Detection Sensitivity:</label>
+          <input
+            type="number"
+            id="tolerance"
+            min="0"
+            max="50"
+            value="5"
+            step="1"
+            title="Color tolerance for detecting grid lines (0-50). Higher = more tolerant to color variations."
+          >
+          <span class="setting-value" id="tolerance-value">5</span>
+        </div>
+
+        <div class="setting-group" style="margin-left: auto;">
+          <span style="font-size: 12px; color: #666;">
+            💡 Tip: Increase sensitivity if grid lines aren't detected
+          </span>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="editor-container" id="editor"></div>
+  <!-- Main Content -->
+  <div class="app-container">
+    <div class="content-area">
+      <div class="editor-container" id="editor"></div>
 
-    <div class="output-panel" id="output" hidden>
-      <h2>📊 Analysis Results</h2>
+      <div class="output-panel" id="output" hidden>
+        <h2>📊 Analysis Results</h2>
 
-      <div class="stats" id="stats"></div>
+        <div class="stats" id="stats"></div>
 
-      <hr class="section-divider">
+        <hr class="section-divider">
 
-      <h3>🎯 Grid Line Segments</h3>
-      <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-        Detected grid lines extracted and analyzed for patterns
-      </p>
-      <div class="component-grid" id="grid-lines"></div>
+        <h3>🎯 Grid Line Segments</h3>
+        <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+          Detected grid lines extracted and analyzed for patterns
+        </p>
+        <div class="component-grid" id="grid-lines"></div>
 
-      <hr class="section-divider">
+        <hr class="section-divider">
 
-      <h3>📦 Cell Components</h3>
-      <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-        Grid cells extracted and prepared for nine-slice scaling
-      </p>
-      <div class="component-grid" id="components"></div>
+        <h3>📦 Cell Components</h3>
+        <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+          Grid cells extracted and prepared for nine-slice scaling
+        </p>
+        <div class="component-grid" id="components"></div>
 
-      <hr class="section-divider">
+        <hr class="section-divider">
 
-      <h3>📄 JSON Output</h3>
-      <pre id="json-output"></pre>
+        <h3>📄 JSON Output</h3>
+        <pre id="json-output"></pre>
 
-      <h3 style="margin-top: 30px;">🎨 CSS Output</h3>
-      <pre id="css-output"></pre>
+        <h3 style="margin-top: 30px;">🎨 CSS Output</h3>
+        <pre id="css-output"></pre>
+      </div>
     </div>
   </div>
 
@@ -195,8 +294,28 @@
     import { exportToJSON } from './json-exporter.js';
     import { exportToCSS } from './css-exporter.js';
 
+    // Global settings
+    window.gridSettings = {
+      tolerance: 5
+    };
+
     const app = new ImageGridAnalyzer(document.getElementById('editor'));
 
+    // Tolerance setting
+    const toleranceInput = document.getElementById('tolerance');
+    const toleranceValue = document.getElementById('tolerance-value');
+
+    toleranceInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      window.gridSettings.tolerance = value;
+      toleranceValue.textContent = value;
+
+      if (window.debug) {
+        window.debug.log('Tolerance changed', { tolerance: value });
+      }
+    });
+
+    // Load image
     document.getElementById('load-btn').addEventListener('click', () => {
       document.getElementById('file-input').click();
     });
@@ -209,12 +328,14 @@
       }
     });
 
+    // Analyze
     document.getElementById('analyze-btn').addEventListener('click', () => {
       const results = app.analyze();
       displayResults(results);
       document.getElementById('export-btn').disabled = false;
     });
 
+    // Export
     document.getElementById('export-btn').addEventListener('click', async () => {
       const exports = await app.export();
 

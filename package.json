@@ -5,8 +5,9 @@
   "description": "Image Grid Analyzer - Automatic nine-slice component extractor with no external dependencies",
   "main": "index.js",
   "scripts": {
-    "save": "git add .; git commit -m 'Updated Release'; npm version patch; npm publish; git push --follow-tags;",
+    "dev": "node debug-server.js",
     "server": "http-server -c-1 -o .",
+    "save": "git add .; git commit -m 'Updated Release'; npm version patch; npm publish; git push --follow-tags;",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -31,7 +32,7 @@
     "type": "github",
     "url": "https://github.com/sponsors/catpea"
   },
-  "dependencies": {
+  "devDependencies": {
     "ws": "^8.18.3"
   }
 }
