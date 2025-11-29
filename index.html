@@ -213,24 +213,278 @@
     .content-area {
       padding: 20px;
     }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      width: 90vw;
+      height: 90vh;
+      background-color: #1a1a1a;
+      padding: 0;
+      box-sizing: border-box;
+      position: relative;
+      border-radius: 8px;
+      border: 2px solid #333;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-body {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .modal-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      padding-right: 10px;
+      min-width: 0;
+    }
+
+    .modal-sidepane {
+      width: 320px;
+      background: #0a0a0a;
+      border-left: 1px solid #333;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .modal-sidepane details {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 0;
+    }
+
+    .modal-sidepane summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 500;
+      color: #4a9eff;
+      font-size: 14px;
+    }
+
+    .modal-sidepane summary:hover {
+      background: #222;
+    }
+
+    .modal-sidepane details[open] summary {
+      border-bottom: 1px solid #333;
+    }
+
+    .sidepane-content {
+      padding: 12px;
+    }
+
+    .sidepane-field {
+      margin-bottom: 12px;
+    }
+
+    .sidepane-field label {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .sidepane-field input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
+    .sidepane-field input[type="text"],
+    .sidepane-field input[type="number"],
+    .sidepane-field select {
+      width: 100%;
+      padding: 6px 8px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .sidepane-field textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 6px 8px;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      resize: vertical;
+    }
+
+    .sidepane-field button {
+      width: 100%;
+      padding: 8px 12px;
+      margin-top: 6px;
+    }
+
+    /* Nine-grid visual editor */
+    .ninegrid-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .ninegrid-rectangle {
+      position: absolute;
+      border: 2px solid #4a9eff;
+      background: rgba(74, 158, 255, 0.1);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+      pointer-events: all;
+      cursor: move;
+    }
+
+    .ninegrid-handle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #4a9eff;
+      border: 1px solid #fff;
+      pointer-events: all;
+      z-index: 101;
+    }
+
+    .ninegrid-handle.nw { top: -4px; left: -4px; cursor: nw-resize; }
+    .ninegrid-handle.n  { top: -4px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+    .ninegrid-handle.ne { top: -4px; right: -4px; cursor: ne-resize; }
+    .ninegrid-handle.w  { top: 50%; left: -4px; transform: translateY(-50%); cursor: w-resize; }
+    .ninegrid-handle.e  { top: 50%; right: -4px; transform: translateY(-50%); cursor: e-resize; }
+    .ninegrid-handle.sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+    .ninegrid-handle.s  { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+    .ninegrid-handle.se { bottom: -4px; right: -4px; cursor: se-resize; }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #333;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      color: #4a9eff;
+      margin: 0;
+    }
+
+    .close-btn {
+      font-size: 30px;
+      cursor: pointer;
+      color: #888;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .close-btn:hover {
+      color: #e0e0e0;
+    }
+
+    .modal-controls {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #0a0a0a;
+      border-radius: 4px;
+    }
+
+    .modal-controls label {
+      font-size: 13px;
+      color: #888;
+    }
+
+    .modal-controls input[type="number"] {
+      width: 80px;
+      padding: 6px 8px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .modal-canvas-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: repeating-conic-gradient(#222 0% 25%, #181818 0% 50%) 50% / 20px 20px;
+      border-radius: 4px;
+      border: 1px solid #333;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #333;
+    }
+
+    .component-preview {
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .component-preview:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+    }
+
+    details summary {
+      user-select: none;
+    }
+
+    details summary::-webkit-details-marker {
+      color: #4a9eff;
+    }
   </style>
 </head>
 <body>
   <!-- Sticky Toolbox -->
   <div class="toolbox">
     <div class="toolbox-inner">
-      <h1>🔍 Image Grid Analyzer</h1>
-
       <div class="toolbar">
         <input type="file" id="file-input" accept="image/*" hidden>
         <button id="load-btn">🖼️ Load Image</button>
         <button id="analyze-btn" disabled>🔬 Analyze Grid</button>
-        <button id="export-btn" disabled>💾 Export All</button>
+        <button id="export-btn" disabled>📦 Export TAR</button>
       </div>
 
       <div class="settings-row">
         <div class="setting-group">
-          <label for="tolerance">Sensitivity:</label>
+          <label for="tolerance">Grid Sensitivity:</label>
           <input
             type="number"
             id="tolerance"
@@ -271,9 +525,23 @@
           <span class="setting-value" id="min-y-gap-value">50</span>
         </div>
 
+        <div class="setting-group">
+          <label for="bg-removal">Shadow Removal:</label>
+          <input
+            type="number"
+            id="bg-removal"
+            min="0"
+            max="100"
+            value="30"
+            step="5"
+            title="Background/shadow removal aggressiveness (0-100). Higher = removes more subtle shadows and gradients."
+          >
+          <span class="setting-value" id="bg-removal-value">30</span>
+        </div>
+
         <div class="setting-group" style="margin-left: auto;">
           <span style="font-size: 12px; color: #666;">
-            💡 Increase sensitivity to detect lines, then adjust gaps to remove duplicates
+            💡 Adjust shadow removal to clean up widget edges
           </span>
         </div>
       </div>
@@ -292,27 +560,162 @@
 
         <hr class="section-divider">
 
-        <h3>🎯 Grid Line Segments</h3>
-        <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-          Detected grid lines extracted and analyzed for patterns
-        </p>
-        <div class="component-grid" id="grid-lines"></div>
+        <details>
+          <summary style="cursor: pointer; font-size: 16px; color: #4a9eff; margin-bottom: 10px;">
+            🎯 Grid Line Segments
+          </summary>
+          <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+            Detected grid lines extracted and analyzed for patterns
+          </p>
+          <div class="component-grid" id="grid-lines"></div>
+        </details>
 
         <hr class="section-divider">
 
-        <h3>📦 Cell Components</h3>
-        <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
-          Grid cells extracted and prepared for nine-slice scaling
-        </p>
-        <div class="component-grid" id="components"></div>
+        <details open>
+          <summary style="cursor: pointer; font-size: 16px; color: #4a9eff; margin-bottom: 10px;">
+            📦 Cell Components
+          </summary>
+          <p style="font-size: 13px; color: #888; margin-bottom: 15px;">
+            Grid cells extracted and prepared for nine-slice scaling (click to inspect)
+          </p>
+          <div class="component-grid" id="components"></div>
+        </details>
 
         <hr class="section-divider">
 
-        <h3>📄 JSON Output</h3>
-        <pre id="json-output"></pre>
+        <details>
+          <summary style="cursor: pointer; font-size: 16px; color: #4a9eff; margin-bottom: 10px;">
+            📄 JSON Output
+          </summary>
+          <pre id="json-output"></pre>
+        </details>
 
-        <h3 style="margin-top: 30px;">🎨 CSS Output</h3>
-        <pre id="css-output"></pre>
+        <hr class="section-divider">
+
+        <details>
+          <summary style="cursor: pointer; font-size: 16px; color: #4a9eff; margin-bottom: 10px;">
+            🎨 CSS Output
+          </summary>
+          <pre id="css-output"></pre>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Inspector Modal -->
+  <div id="component-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid #333;">
+        <h3 class="modal-title" id="modal-component-name">Component Inspector</h3>
+        <span class="close-btn" id="modal-close">&times;</span>
+      </div>
+
+      <div class="modal-body">
+        <!-- Main canvas area -->
+        <div class="modal-main">
+          <div class="modal-controls">
+            <label for="modal-shadow-delta">Shadow Removal Delta:</label>
+            <input type="number" id="modal-shadow-delta" min="-50" max="50" value="0" step="5">
+            <button id="modal-apply-btn">Apply</button>
+            <span style="font-size: 12px; color: #666; margin-left: auto;">
+              💡 Use mouse wheel to zoom, drag to pan
+            </span>
+          </div>
+
+          <div class="modal-canvas-container" id="modal-canvas-container">
+            <!-- Pan-zoom canvas will be inserted here -->
+          </div>
+
+          <div class="modal-footer">
+            <button id="modal-ok-btn">OK</button>
+          </div>
+        </div>
+
+        <!-- Sidepane -->
+        <div class="modal-sidepane">
+          <!-- Decal Grid -->
+          <details id="decal-section">
+            <summary>🎨 Decal Grid</summary>
+            <div class="sidepane-content">
+              <p style="font-size: 12px; color: #888; margin: 0 0 12px;">
+                Use as bitmap button or graphic motif with fixed dimensions.
+              </p>
+              <div class="sidepane-field">
+                <label>
+                  <input type="checkbox" id="decal-tile">
+                  Enable Tiling
+                </label>
+                <small style="color: #666; font-size: 11px;">
+                  Prepare seamless tileable image in external editor
+                </small>
+              </div>
+              <div class="sidepane-field">
+                <label>CSS Class Name</label>
+                <input type="text" id="decal-class" placeholder="decal-01" value="">
+              </div>
+            </div>
+          </details>
+
+          <!-- Image Map -->
+          <details id="imagemap-section">
+            <summary>🗺️ Image Map</summary>
+            <div class="sidepane-content">
+              <p style="font-size: 12px; color: #888; margin: 0 0 12px;">
+                Create clickable areas (rect, circle, poly) for interactive designs.
+              </p>
+              <div class="sidepane-field">
+                <label>Map Name</label>
+                <input type="text" id="imagemap-name" placeholder="widget-map" value="">
+              </div>
+              <div class="sidepane-field">
+                <label>Areas (HTML)</label>
+                <textarea id="imagemap-areas" placeholder="&lt;area shape=&quot;rect&quot; coords=&quot;0,0,50,50&quot; href=&quot;#&quot; alt=&quot;Button&quot;&gt;"></textarea>
+                <small style="color: #666; font-size: 11px;">
+                  Future: Visual editor with rect/circle/poly tools
+                </small>
+              </div>
+            </div>
+          </details>
+
+          <!-- Nine Grid -->
+          <details id="ninegrid-section" open>
+            <summary>⊞ Nine Grid</summary>
+            <div class="sidepane-content">
+              <p style="font-size: 12px; color: #888; margin: 0 0 12px;">
+                Define border dimensions for scalable nine-slice components.
+              </p>
+              <div class="sidepane-field">
+                <label>Border Slices (px)</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
+                  <div style="grid-column: 2;">
+                    <input type="number" id="ninegrid-top" min="0" placeholder="Top" value="16">
+                  </div>
+                  <div></div>
+                  <div>
+                    <input type="number" id="ninegrid-left" min="0" placeholder="Left" value="16">
+                  </div>
+                  <div style="text-align: center; padding: 6px; color: #666; font-size: 11px;">
+                    Center
+                  </div>
+                  <div>
+                    <input type="number" id="ninegrid-right" min="0" placeholder="Right" value="16">
+                  </div>
+                  <div></div>
+                  <div style="grid-column: 2;">
+                    <input type="number" id="ninegrid-bottom" min="0" placeholder="Bottom" value="16">
+                  </div>
+                </div>
+              </div>
+              <div class="sidepane-field">
+                <button id="ninegrid-visual-btn">Enable Visual Editor</button>
+                <small style="color: #666; font-size: 11px; display: block; margin-top: 4px;">
+                  Drag rectangle on canvas to define borders
+                </small>
+              </div>
+            </div>
+          </details>
+        </div>
       </div>
     </div>
   </div>
@@ -321,12 +724,16 @@
     import { ImageGridAnalyzer } from './index.js';
     import { exportToJSON } from './json-exporter.js';
     import { exportToCSS } from './css-exporter.js';
+    import { exportToTar } from './tar-exporter.js';
+    import { PanZoom } from './pan-zoom.js';
+    import { removeBackground, trimTransparentPadding } from './background-remover.js';
 
     // Global settings
     window.gridSettings = {
       tolerance: 5,
       minXGap: 50,
-      minYGap: 50
+      minYGap: 50,
+      backgroundRemoval: 30
     };
 
     const app = new ImageGridAnalyzer(document.getElementById('editor'));
@@ -373,6 +780,20 @@
       }
     });
 
+    // Background Removal setting
+    const bgRemovalInput = document.getElementById('bg-removal');
+    const bgRemovalValue = document.getElementById('bg-removal-value');
+
+    bgRemovalInput.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      window.gridSettings.backgroundRemoval = value;
+      bgRemovalValue.textContent = value;
+
+      if (window.debug) {
+        window.debug.log('Background Removal changed', { backgroundRemoval: value });
+      }
+    });
+
     // Load image
     document.getElementById('load-btn').addEventListener('click', () => {
       document.getElementById('file-input').click();
@@ -388,21 +809,57 @@
 
     // Analyze
     document.getElementById('analyze-btn').addEventListener('click', () => {
-      const results = app.analyze();
-      displayResults(results);
-      document.getElementById('export-btn').disabled = false;
+      // Set busy cursor to indicate CPU-intensive work
+      document.body.style.cursor = 'wait';
+
+      // Use setTimeout to allow cursor change to render before blocking computation
+      setTimeout(() => {
+        try {
+          const results = app.analyze();
+          displayResults(results);
+          document.getElementById('export-btn').disabled = false;
+        } finally {
+          // Restore cursor
+          document.body.style.cursor = 'default';
+        }
+      }, 10);
     });
 
     // Export
     document.getElementById('export-btn').addEventListener('click', async () => {
-      const exports = await app.export();
+      // Set busy cursor
+      document.body.style.cursor = 'wait';
 
-      // Download files
-      downloadFile('components.json', exports.json, 'application/json');
-      downloadFile('components.css', exports.css, 'text/css');
+      try {
+        const exports = await app.export();
 
-      for (const png of exports.pngBlobs) {
-        downloadBlob(`${png.name}.png`, png.blob);
+        // Create tar archive with all components
+        const tarBlob = await exportToTar(
+          exports.gridConfig,
+          exports.components,
+          exports.json,
+          exports.css,
+          exports.pngBlobs
+        );
+
+        // Download tar archive
+        const url = URL.createObjectURL(tarBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'components.tar';
+        a.click();
+        URL.revokeObjectURL(url);
+
+        if (window.debug) {
+          window.debug.log('Exported components as TAR archive', {
+            components: exports.components.length,
+            images: exports.pngBlobs.length,
+            tarSize: `${(tarBlob.size / 1024).toFixed(1)} KB`
+          });
+        }
+      } finally {
+        // Restore cursor
+        document.body.style.cursor = 'default';
       }
     });
 
@@ -414,7 +871,7 @@
       statsContainer.innerHTML = `
         <div class="stat-item">
           <div class="stat-label">Grid Configuration</div>
-          <div class="stat-value">${results.gridConfig.rows}×${results.gridConfig.columns}</div>
+          <div class="stat-value">${results.gridConfig.columns}×${results.gridConfig.rows}</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Grid Line Segments</div>
@@ -439,13 +896,18 @@
         gridLinesContainer.appendChild(preview);
       }
 
-      // Show cell components
+      // Show cell components (filter out empty/transparent ones)
       const componentsContainer = document.getElementById('components');
       componentsContainer.innerHTML = '';
 
-      for (const component of results.components) {
+      const nonEmptyComponents = results.components.filter(c => !c.isEmpty);
+      for (const component of nonEmptyComponents) {
         const preview = createComponentPreview(component);
         componentsContainer.appendChild(preview);
+      }
+
+      if (nonEmptyComponents.length === 0) {
+        componentsContainer.innerHTML = '<p style="color: #888; text-align: center;">No cell components detected. Adjust grid settings.</p>';
       }
 
       // Show JSON
@@ -465,9 +927,13 @@
       const canvas = document.createElement('canvas');
       canvas.width = component.width;
       canvas.height = component.height;
+      canvas.style.imageRendering = 'pixelated';
 
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { alpha: true, willReadFrequently: true });
       ctx.imageSmoothingEnabled = false;
+      ctx.webkitImageSmoothingEnabled = false;
+      ctx.mozImageSmoothingEnabled = false;
+      ctx.msImageSmoothingEnabled = false;
       ctx.putImageData(component.imageData, 0, 0);
 
       const label = document.createElement('p');
@@ -482,6 +948,13 @@
       preview.appendChild(canvas);
       preview.appendChild(label);
       preview.appendChild(dimensions);
+
+      // Make cell components clickable to open inspector modal
+      if (component.type === 'cell') {
+        preview.addEventListener('click', () => {
+          openComponentInspector(component, preview);
+        });
+      }
 
       return preview;
     }
@@ -507,6 +980,616 @@
       a.click();
       URL.revokeObjectURL(url);
     }
+
+    // ============================================================================
+    // Component Inspector Modal
+    // ============================================================================
+
+    const modal = document.getElementById('component-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalOkBtn = document.getElementById('modal-ok-btn');
+    const modalApplyBtn = document.getElementById('modal-apply-btn');
+    const modalShadowDelta = document.getElementById('modal-shadow-delta');
+    const modalComponentName = document.getElementById('modal-component-name');
+    const modalCanvasContainer = document.getElementById('modal-canvas-container');
+
+    let currentInspectorComponent = null;
+    let currentInspectorOriginalImageData = null; // Store original for fresh re-processing
+    let currentInspectorPreview = null;
+    let modalPanZoom = null;
+    let modalCanvas = null;
+
+    function openComponentInspector(component, previewElement) {
+      // Store deep copy of component and original imageData
+      currentInspectorComponent = { ...component };
+
+      // Store original RAW cell imageData for fresh re-processing
+      // This is the UNTOUCHED cell data before background removal
+      if (component.originalImageData) {
+        currentInspectorOriginalImageData = new ImageData(
+          new Uint8ClampedArray(component.originalImageData.data),
+          component.originalImageData.width,
+          component.originalImageData.height
+        );
+      } else {
+        // Fallback to current imageData if originalImageData not available
+        currentInspectorOriginalImageData = new ImageData(
+          new Uint8ClampedArray(component.imageData.data),
+          component.imageData.width,
+          component.imageData.height
+        );
+      }
+
+      currentInspectorPreview = previewElement;
+
+      // Set modal title
+      modalComponentName.textContent = `${component.name} (${component.width}×${component.height})`;
+
+      // Reset shadow delta
+      modalShadowDelta.value = 0;
+
+      // Load configuration from component if exists
+      if (component.config) {
+        // Load decal settings
+        document.getElementById('decal-tile').checked = component.config.decal?.tile || false;
+        document.getElementById('decal-class').value = component.config.decal?.className || '';
+
+        // Load imagemap settings
+        document.getElementById('imagemap-name').value = component.config.imagemap?.name || '';
+        document.getElementById('imagemap-areas').value = component.config.imagemap?.areas || '';
+
+        // Load ninegrid settings
+        ninegridTopInput.value = component.config.ninegrid?.top || 16;
+        ninegridRightInput.value = component.config.ninegrid?.right || 16;
+        ninegridBottomInput.value = component.config.ninegrid?.bottom || 16;
+        ninegridLeftInput.value = component.config.ninegrid?.left || 16;
+      } else {
+        // Default values
+        document.getElementById('decal-tile').checked = false;
+        document.getElementById('decal-class').value = `decal-${component.row}-${component.col}`;
+        document.getElementById('imagemap-name').value = '';
+        document.getElementById('imagemap-areas').value = '';
+        ninegridTopInput.value = 16;
+        ninegridRightInput.value = 16;
+        ninegridBottomInput.value = 16;
+        ninegridLeftInput.value = 16;
+      }
+
+      // Create canvas for modal
+      modalCanvas = document.createElement('canvas');
+      modalCanvas.width = component.width;
+      modalCanvas.height = component.height;
+      modalCanvas.style.imageRendering = 'pixelated';
+
+      const ctx = modalCanvas.getContext('2d', { alpha: true, willReadFrequently: true });
+      ctx.imageSmoothingEnabled = false;
+      ctx.webkitImageSmoothingEnabled = false;
+      ctx.mozImageSmoothingEnabled = false;
+      ctx.msImageSmoothingEnabled = false;
+      ctx.putImageData(component.imageData, 0, 0);
+
+      // Clear container and create pan-zoom wrapper
+      modalCanvasContainer.innerHTML = '';
+
+      // Create pan-zoom content wrapper (required by PanZoom class)
+      const panZoomContent = document.createElement('div');
+      panZoomContent.className = 'pan-zoom-content';
+      panZoomContent.style.transformOrigin = '0 0';
+      panZoomContent.style.display = 'inline-block';
+      panZoomContent.appendChild(modalCanvas);
+
+      modalCanvasContainer.appendChild(panZoomContent);
+
+      // Create pan-zoom for canvas
+      modalPanZoom = new PanZoom(modalCanvasContainer);
+
+      // Center and fit the widget in the view with small gap
+      setTimeout(() => {
+        if (modalPanZoom) {
+          centerAndFitWidget();
+        }
+      }, 50); // Small delay to ensure layout is complete
+
+      // Show modal
+      modal.style.display = 'flex';
+
+      if (window.debug) {
+        window.debug.log('Opened component inspector', {
+          component: component.name,
+          size: `${component.width}×${component.height}`
+        });
+      }
+    }
+
+    function centerAndFitWidget() {
+      const panZoomContent = modalCanvasContainer.querySelector('.pan-zoom-content');
+      if (!panZoomContent || !modalCanvas) return;
+
+      const containerRect = modalCanvasContainer.getBoundingClientRect();
+      const canvasWidth = modalCanvas.width;
+      const canvasHeight = modalCanvas.height;
+
+      // Calculate scale to fit with 10% gap on all sides
+      const scaleX = (containerRect.width * 0.9) / canvasWidth;
+      const scaleY = (containerRect.height * 0.9) / canvasHeight;
+      const scale = Math.min(scaleX, scaleY, 8); // Max 8x zoom
+
+      // Center the canvas
+      const scaledWidth = canvasWidth * scale;
+      const scaledHeight = canvasHeight * scale;
+      const translateX = (containerRect.width - scaledWidth) / 2;
+      const translateY = (containerRect.height - scaledHeight) / 2;
+
+      // Apply transform
+      modalPanZoom.scale = scale;
+      modalPanZoom.translateX = translateX;
+      modalPanZoom.translateY = translateY;
+      modalPanZoom.updateTransform();
+    }
+
+    function closeComponentInspector() {
+      modal.style.display = 'none';
+      if (modalPanZoom) {
+        modalPanZoom = null;
+      }
+      // Clean up ninegrid overlay
+      if (ninegridActive) {
+        removeNinegridOverlay();
+        ninegridActive = false;
+        ninegridVisualBtn.textContent = 'Enable Visual Editor';
+        ninegridVisualBtn.style.background = '';
+      }
+      currentInspectorComponent = null;
+      currentInspectorOriginalImageData = null;
+      currentInspectorPreview = null;
+    }
+
+    function applyComponentAdjustments() {
+      if (!currentInspectorComponent || !currentInspectorOriginalImageData) return;
+
+      const shadowDelta = parseInt(modalShadowDelta.value);
+
+      // Adjust background removal setting temporarily
+      const originalSetting = window.gridSettings.backgroundRemoval;
+      const adjustedSetting = Math.max(0, Math.min(100, originalSetting + shadowDelta));
+      window.gridSettings.backgroundRemoval = adjustedSetting;
+
+      // IMPORTANT: Re-process from ORIGINAL imageData for fresh result
+      // This ensures delta adjustments are not cumulative
+      const freshCopy = new ImageData(
+        new Uint8ClampedArray(currentInspectorOriginalImageData.data),
+        currentInspectorOriginalImageData.width,
+        currentInspectorOriginalImageData.height
+      );
+
+      const cleanedData = removeBackground(freshCopy);
+      const trimResult = trimTransparentPadding(cleanedData);
+
+      // Restore original setting
+      window.gridSettings.backgroundRemoval = originalSetting;
+
+      if (trimResult.isEmpty) {
+        alert('Component became empty after adjustment. Try a less aggressive setting.');
+        return;
+      }
+
+      // Update modal canvas
+      modalCanvas.width = trimResult.bounds.width;
+      modalCanvas.height = trimResult.bounds.height;
+
+      const ctx = modalCanvas.getContext('2d', { alpha: true, willReadFrequently: true });
+      ctx.imageSmoothingEnabled = false;
+      ctx.webkitImageSmoothingEnabled = false;
+      ctx.mozImageSmoothingEnabled = false;
+      ctx.msImageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+      ctx.putImageData(trimResult.imageData, 0, 0);
+
+      // Update current component data
+      currentInspectorComponent.imageData = trimResult.imageData;
+      currentInspectorComponent.width = trimResult.bounds.width;
+      currentInspectorComponent.height = trimResult.bounds.height;
+
+      // Update title with new dimensions
+      modalComponentName.textContent = `${currentInspectorComponent.name} (${trimResult.bounds.width}×${trimResult.bounds.height})`;
+
+      // Re-center and fit the widget after size change
+      setTimeout(() => {
+        if (modalPanZoom) {
+          centerAndFitWidget();
+        }
+      }, 50);
+
+      if (window.debug) {
+        window.debug.log('Applied shadow delta adjustment', {
+          delta: shadowDelta,
+          adjustedSetting: adjustedSetting,
+          newSize: `${trimResult.bounds.width}×${trimResult.bounds.height}`
+        });
+      }
+    }
+
+    function saveComponentAdjustments() {
+      if (!currentInspectorComponent || !currentInspectorPreview) {
+        closeComponentInspector();
+        return;
+      }
+
+      // Save configuration from sidepane
+      const decalTile = document.getElementById('decal-tile').checked;
+      const decalClass = document.getElementById('decal-class').value;
+      const imagemapName = document.getElementById('imagemap-name').value;
+      const imagemapAreas = document.getElementById('imagemap-areas').value;
+      const ninegridTop = parseInt(ninegridTopInput.value) || 0;
+      const ninegridRight = parseInt(ninegridRightInput.value) || 0;
+      const ninegridBottom = parseInt(ninegridBottomInput.value) || 0;
+      const ninegridLeft = parseInt(ninegridLeftInput.value) || 0;
+
+      // Create configuration object
+      const config = {
+        decal: {
+          enabled: decalTile || decalClass.length > 0,
+          tile: decalTile,
+          className: decalClass || `decal-${currentInspectorComponent.row}-${currentInspectorComponent.col}`
+        },
+        imagemap: {
+          enabled: imagemapName.length > 0 || imagemapAreas.length > 0,
+          name: imagemapName || `map-${currentInspectorComponent.name}`,
+          areas: imagemapAreas
+        },
+        ninegrid: {
+          enabled: true, // Always enabled for now
+          top: ninegridTop,
+          right: ninegridRight,
+          bottom: ninegridBottom,
+          left: ninegridLeft
+        }
+      };
+
+      // Store configuration in current component
+      currentInspectorComponent.config = config;
+
+      // Also update nineSlice property to match ninegrid config
+      currentInspectorComponent.nineSlice = {
+        top: ninegridTop,
+        right: ninegridRight,
+        bottom: ninegridBottom,
+        left: ninegridLeft
+      };
+
+      // Find and update the actual component in app.components array
+      const actualComponent = app.components.find(c => c.name === currentInspectorComponent.name);
+      if (actualComponent) {
+        actualComponent.config = config;
+        actualComponent.nineSlice = currentInspectorComponent.nineSlice;
+        actualComponent.imageData = currentInspectorComponent.imageData;
+        actualComponent.width = currentInspectorComponent.width;
+        actualComponent.height = currentInspectorComponent.height;
+      }
+
+      // Update the preview in the main panel
+      const previewCanvas = currentInspectorPreview.querySelector('canvas');
+      if (previewCanvas) {
+        previewCanvas.width = currentInspectorComponent.width;
+        previewCanvas.height = currentInspectorComponent.height;
+
+        const ctx = previewCanvas.getContext('2d', { alpha: true, willReadFrequently: true });
+        ctx.imageSmoothingEnabled = false;
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.msImageSmoothingEnabled = false;
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        ctx.putImageData(currentInspectorComponent.imageData, 0, 0);
+      }
+
+      // Update dimensions label
+      const dimensionsLabel = currentInspectorPreview.querySelectorAll('p')[1];
+      if (dimensionsLabel) {
+        dimensionsLabel.textContent = `${currentInspectorComponent.width}×${currentInspectorComponent.height}`;
+      }
+
+      if (window.debug) {
+        window.debug.log('Saved component adjustments', {
+          component: currentInspectorComponent.name,
+          finalSize: `${currentInspectorComponent.width}×${currentInspectorComponent.height}`,
+          config: currentInspectorComponent.config
+        });
+      }
+
+      closeComponentInspector();
+    }
+
+    // Modal event listeners
+    modalClose.addEventListener('click', closeComponentInspector);
+    modalOkBtn.addEventListener('click', saveComponentAdjustments);
+    modalApplyBtn.addEventListener('click', applyComponentAdjustments);
+
+    // Close modal when clicking outside content
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeComponentInspector();
+      }
+    });
+
+    // ============================================================================
+    // Nine-Grid Visual Editor
+    // ============================================================================
+
+    const ninegridVisualBtn = document.getElementById('ninegrid-visual-btn');
+    const ninegridTopInput = document.getElementById('ninegrid-top');
+    const ninegridRightInput = document.getElementById('ninegrid-right');
+    const ninegridBottomInput = document.getElementById('ninegrid-bottom');
+    const ninegridLeftInput = document.getElementById('ninegrid-left');
+
+    let ninegridOverlay = null;
+    let ninegridRectangle = null;
+    let ninegridActive = false;
+    let ninegridDragState = null;
+
+    function createNinegridOverlay() {
+      if (ninegridOverlay) return; // Already exists
+
+      // Create overlay container
+      ninegridOverlay = document.createElement('div');
+      ninegridOverlay.className = 'ninegrid-overlay';
+
+      // Create rectangle (inner border area)
+      ninegridRectangle = document.createElement('div');
+      ninegridRectangle.className = 'ninegrid-rectangle';
+
+      // Add resize handles
+      const handlePositions = ['nw', 'n', 'ne', 'w', 'e', 'sw', 's', 'se'];
+      handlePositions.forEach(pos => {
+        const handle = document.createElement('div');
+        handle.className = `ninegrid-handle ${pos}`;
+        handle.dataset.position = pos;
+        ninegridRectangle.appendChild(handle);
+      });
+
+      ninegridOverlay.appendChild(ninegridRectangle);
+
+      // Add to pan-zoom content (so it scales with canvas)
+      const panZoomContent = modalCanvasContainer.querySelector('.pan-zoom-content');
+      if (panZoomContent) {
+        panZoomContent.appendChild(ninegridOverlay);
+      }
+
+      // Initialize rectangle position from inputs
+      updateNinegridRectangleFromInputs();
+
+      // Setup drag handlers
+      setupNinegridDrag();
+    }
+
+    function removeNinegridOverlay() {
+      if (ninegridOverlay) {
+        ninegridOverlay.remove();
+        ninegridOverlay = null;
+        ninegridRectangle = null;
+      }
+    }
+
+    function toggleNinegridVisualEditor() {
+      ninegridActive = !ninegridActive;
+
+      if (ninegridActive) {
+        createNinegridOverlay();
+        ninegridVisualBtn.textContent = 'Disable Visual Editor';
+        ninegridVisualBtn.style.background = '#ff4a4a';
+      } else {
+        removeNinegridOverlay();
+        ninegridVisualBtn.textContent = 'Enable Visual Editor';
+        ninegridVisualBtn.style.background = '';
+      }
+    }
+
+    function updateNinegridRectangleFromInputs() {
+      if (!ninegridRectangle || !modalCanvas) return;
+
+      const top = parseInt(ninegridTopInput.value) || 0;
+      const right = parseInt(ninegridRightInput.value) || 0;
+      const bottom = parseInt(ninegridBottomInput.value) || 0;
+      const left = parseInt(ninegridLeftInput.value) || 0;
+
+      const canvasWidth = modalCanvas.width;
+      const canvasHeight = modalCanvas.height;
+
+      // Inner rectangle position and size
+      const innerLeft = left;
+      const innerTop = top;
+      const innerWidth = Math.max(20, canvasWidth - left - right);
+      const innerHeight = Math.max(20, canvasHeight - top - bottom);
+
+      ninegridRectangle.style.left = innerLeft + 'px';
+      ninegridRectangle.style.top = innerTop + 'px';
+      ninegridRectangle.style.width = innerWidth + 'px';
+      ninegridRectangle.style.height = innerHeight + 'px';
+    }
+
+    function updateInputsFromNinegridRectangle() {
+      if (!ninegridRectangle || !modalCanvas) return;
+
+      const left = parseFloat(ninegridRectangle.style.left) || 0;
+      const top = parseFloat(ninegridRectangle.style.top) || 0;
+      const width = parseFloat(ninegridRectangle.style.width) || 0;
+      const height = parseFloat(ninegridRectangle.style.height) || 0;
+
+      const canvasWidth = modalCanvas.width;
+      const canvasHeight = modalCanvas.height;
+
+      ninegridTopInput.value = Math.round(top);
+      const right = canvasWidth - left - width;
+      ninegridRightInput.value = Math.round(right);
+      const bottom = canvasHeight - top - height;
+      ninegridBottomInput.value = Math.round(bottom);
+      ninegridLeftInput.value = Math.round(left);
+    }
+
+    function setupNinegridDrag() {
+      if (!ninegridRectangle) return;
+
+      // Drag rectangle body (move entire rectangle)
+      ninegridRectangle.addEventListener('pointerdown', (e) => {
+        if (e.target.classList.contains('ninegrid-handle')) return;
+        if (e.target !== ninegridRectangle) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const rect = ninegridRectangle.getBoundingClientRect();
+        const panZoomContent = modalCanvasContainer.querySelector('.pan-zoom-content');
+        const contentRect = panZoomContent.getBoundingClientRect();
+
+        // Convert screen to world coordinates
+        const world = modalPanZoom.toWorld(e.clientX, e.clientY);
+        const worldRect = modalPanZoom.toWorld(rect.left, rect.top);
+
+        ninegridDragState = {
+          type: 'move',
+          offsetX: world.wx - worldRect.wx,
+          offsetY: world.wy - worldRect.wy,
+          startLeft: parseFloat(ninegridRectangle.style.left),
+          startTop: parseFloat(ninegridRectangle.style.top),
+          width: parseFloat(ninegridRectangle.style.width),
+          height: parseFloat(ninegridRectangle.style.height)
+        };
+      });
+
+      // Drag handles (resize rectangle)
+      ninegridRectangle.querySelectorAll('.ninegrid-handle').forEach(handle => {
+        handle.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const world = modalPanZoom.toWorld(e.clientX, e.clientY);
+
+          ninegridDragState = {
+            type: 'resize',
+            position: handle.dataset.position,
+            startWorldX: world.wx,
+            startWorldY: world.wy,
+            startLeft: parseFloat(ninegridRectangle.style.left),
+            startTop: parseFloat(ninegridRectangle.style.top),
+            startWidth: parseFloat(ninegridRectangle.style.width),
+            startHeight: parseFloat(ninegridRectangle.style.height)
+          };
+        });
+      });
+    }
+
+    // Global pointer move handler for ninegrid dragging
+    document.addEventListener('pointermove', (e) => {
+      if (!ninegridDragState || !ninegridRectangle || !modalCanvas) return;
+
+      e.preventDefault();
+
+      const world = modalPanZoom.toWorld(e.clientX, e.clientY);
+      const canvasWidth = modalCanvas.width;
+      const canvasHeight = modalCanvas.height;
+
+      if (ninegridDragState.type === 'move') {
+        // Move entire rectangle
+        let newLeft = world.wx - ninegridDragState.offsetX;
+        let newTop = world.wy - ninegridDragState.offsetY;
+
+        // Constrain to canvas bounds
+        newLeft = Math.max(0, Math.min(newLeft, canvasWidth - ninegridDragState.width));
+        newTop = Math.max(0, Math.min(newTop, canvasHeight - ninegridDragState.height));
+
+        ninegridRectangle.style.left = Math.round(newLeft) + 'px';
+        ninegridRectangle.style.top = Math.round(newTop) + 'px';
+
+        updateInputsFromNinegridRectangle();
+
+      } else if (ninegridDragState.type === 'resize') {
+        // Resize rectangle
+        const deltaX = world.wx - ninegridDragState.startWorldX;
+        const deltaY = world.wy - ninegridDragState.startWorldY;
+        const pos = ninegridDragState.position;
+
+        let newLeft = ninegridDragState.startLeft;
+        let newTop = ninegridDragState.startTop;
+        let newWidth = ninegridDragState.startWidth;
+        let newHeight = ninegridDragState.startHeight;
+
+        // Calculate based on handle position
+        if (pos.includes('w')) {
+          newWidth = ninegridDragState.startWidth - deltaX;
+          newLeft = ninegridDragState.startLeft + deltaX;
+        } else if (pos.includes('e')) {
+          newWidth = ninegridDragState.startWidth + deltaX;
+        }
+
+        if (pos.includes('n')) {
+          newHeight = ninegridDragState.startHeight - deltaY;
+          newTop = ninegridDragState.startTop + deltaY;
+        } else if (pos.includes('s')) {
+          newHeight = ninegridDragState.startHeight + deltaY;
+        }
+
+        // Constrain minimum size
+        const minSize = 20;
+        if (newWidth < minSize) {
+          if (pos.includes('w')) {
+            newLeft = ninegridDragState.startLeft + ninegridDragState.startWidth - minSize;
+          }
+          newWidth = minSize;
+        }
+        if (newHeight < minSize) {
+          if (pos.includes('n')) {
+            newTop = ninegridDragState.startTop + ninegridDragState.startHeight - minSize;
+          }
+          newHeight = minSize;
+        }
+
+        // Constrain to canvas bounds
+        if (newLeft < 0) {
+          newWidth += newLeft;
+          newLeft = 0;
+        }
+        if (newTop < 0) {
+          newHeight += newTop;
+          newTop = 0;
+        }
+        if (newLeft + newWidth > canvasWidth) {
+          newWidth = canvasWidth - newLeft;
+        }
+        if (newTop + newHeight > canvasHeight) {
+          newHeight = canvasHeight - newTop;
+        }
+
+        ninegridRectangle.style.left = Math.round(newLeft) + 'px';
+        ninegridRectangle.style.top = Math.round(newTop) + 'px';
+        ninegridRectangle.style.width = Math.round(newWidth) + 'px';
+        ninegridRectangle.style.height = Math.round(newHeight) + 'px';
+
+        updateInputsFromNinegridRectangle();
+      }
+    });
+
+    // Global pointer up handler
+    document.addEventListener('pointerup', () => {
+      ninegridDragState = null;
+    });
+
+    // Input field change handlers - update rectangle when inputs change
+    [ninegridTopInput, ninegridRightInput, ninegridBottomInput, ninegridLeftInput].forEach(input => {
+      input.addEventListener('input', () => {
+        if (ninegridActive) {
+          updateNinegridRectangleFromInputs();
+        }
+      });
+    });
+
+    // Enable visual editor button
+    ninegridVisualBtn.addEventListener('click', toggleNinegridVisualEditor);
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        closeComponentInspector();
+      }
+    });
   </script>
 </body>
 </html>

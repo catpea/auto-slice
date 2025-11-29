@@ -153,7 +153,7 @@ function handleClientMessage(ws, message) {
       console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
       console.log(`✅ Analysis Complete`);
       console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-      console.log(`Grid Configuration: ${message.data.gridConfig.rows}×${message.data.gridConfig.columns}`);
+      console.log(`Grid Configuration: ${message.data.gridConfig.columns}×${message.data.gridConfig.rows}`);
       console.log(`Grid Line Segments: ${message.data.gridLineComponents.length}`);
       console.log(`Cell Components:    ${message.data.components.length}`);
       console.log(`Total Shapes:       ${message.data.totalShapes}`);
@@ -182,7 +182,7 @@ function handleClientMessage(ws, message) {
 
     case 'grid-detected':
       console.log(`\n📊 Grid Detected:`);
-      console.log(`  Configuration: ${message.data.rows}×${message.data.columns}`);
+      console.log(`  Configuration: ${message.data.columns}×${message.data.rows}`);
       console.log(`  Horizontal lines: ${message.data.horizontalSlices.length}`);
       console.log(`  Vertical lines:   ${message.data.verticalSlices.length}`);
       console.log(`  Cells:            ${message.data.cells.length}`);

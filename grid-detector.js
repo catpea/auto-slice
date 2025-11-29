@@ -83,8 +83,11 @@ export function detectGrid(imageData) {
   }
 
   return {
-    rows: horizontalSlices.length + 1,
-    columns: verticalSlices.length + 1,
+    // Cells are only created BETWEEN gridlines
+    // columns (X) = gaps between vertical lines
+    // rows (Y) = gaps between horizontal lines
+    columns: verticalSlices.length > 0 ? verticalSlices.length - 1 : 1,
+    rows: horizontalSlices.length > 0 ? horizontalSlices.length - 1 : 1,
     horizontalSlices: horizontalSlices,
     verticalSlices: verticalSlices,
     horizontalLineGroups: filteredHorizontalGroups,
@@ -408,29 +411,42 @@ function enforceMinimumGap(lineGroups, minGap) {
 
 /**
  * Compute cell boundaries from slice lines.
- * Trims outer borders to exclude frame pixels from cell content.
+ * Cells are ONLY created between gridlines, not in border areas.
+ * Areas before the first gridline and after the last gridline are trimmed off.
  *
  * @param {number[]} horizontalLines - Y coordinates of horizontal slices
  * @param {number[]} verticalLines - X coordinates of vertical slices
  * @param {number} width - Image width
  * @param {number} height - Image height
- * @param {Object} outerBorders - Detected outer border widths
+ * @param {Object} outerBorders - Detected outer border widths (not used for cell boundaries)
  * @returns {Array} - Array of cell objects with x, y, width, height
  */
 function computeCells(horizontalLines, verticalLines, width, height, outerBorders) {
   const cells = [];
 
-  // Use outer borders as boundaries instead of 0
-  const contentLeft = outerBorders.left;
-  const contentTop = outerBorders.top;
-  const contentRight = width - outerBorders.right;
-  const contentBottom = height - outerBorders.bottom;
+  // IMPORTANT: Cells are ONLY created BETWEEN gridlines
+  // The areas from image edge to first gridline and from last gridline to image edge
+  // are border areas that should be trimmed off, not treated as widgets
 
-  // Add boundaries (content area edges and internal dividers)
-  const yBoundaries = [contentTop, ...horizontalLines, contentBottom];
-  const xBoundaries = [contentLeft, ...verticalLines, contentRight];
+  // If we have no gridlines, there's only one big cell (the entire content area)
+  if (horizontalLines.length === 0 && verticalLines.length === 0) {
+    cells.push({
+      type: 'cell',
+      row: 0,
+      col: 0,
+      x: 0,
+      y: 0,
+      width: width,
+      height: height
+    });
+    return cells;
+  }
 
-  // Create cells from boundaries
+  // Use gridlines as boundaries
+  const yBoundaries = horizontalLines;
+  const xBoundaries = verticalLines;
+
+  // Create cells between gridlines only
   for (let row = 0; row < yBoundaries.length - 1; row++) {
     for (let col = 0; col < xBoundaries.length - 1; col++) {
       const y = yBoundaries[row];

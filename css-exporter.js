@@ -10,7 +10,7 @@
  * @param {string} imageBasePath - Base path for image URLs
  * @returns {string} - CSS stylesheet content
  */
-export function exportToCSS(components, imageBasePath = './') {
+export function exportToCSS(components, imageBasePath = 'images/') {
   const cssBlocks = [];
 
   // Header comment
@@ -63,6 +63,7 @@ export function exportToCSS(components, imageBasePath = './') {
     // Pseudo-element variants for more control
     cssBlocks.push(`.${className}-pseudo {
   position: relative;
+  z-index: 1;
 }
 
 .${className}-pseudo::before {

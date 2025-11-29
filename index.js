@@ -6,7 +6,7 @@
 
 import { detectGrid } from './grid-detector.js';
 import { splitImage } from './image-splitter.js';
-import { removeBackground, removeShadowsAlongSlices } from './background-remover.js';
+import { removeBackground, removeShadowsAlongSlices, trimTransparentPadding } from './background-remover.js';
 import { decomposeIntoShapes } from './shape-decomposer.js';
 import { exportToPNG } from './png-exporter.js';
 import { exportToJSON } from './json-exporter.js';
@@ -149,17 +149,72 @@ class ImageGridAnalyzer {
     const cellProcessStartTime = performance.now();
     this.components = [];
     for (const cell of splitData.cells) {
+      // Store original raw cell data BEFORE any processing
+      // This is critical for modal re-processing with delta adjustments
+      const originalCellData = new ImageData(
+        new Uint8ClampedArray(cell.imageData.data),
+        cell.imageData.width,
+        cell.imageData.height
+      );
+
+      // Debug: log cell processing start
+      if (window.debug) {
+        window.debug.log(`Processing cell-${cell.row}-${cell.col}`, {
+          dimensions: `${cell.width}x${cell.height}`,
+          position: `(${cell.x}, ${cell.y})`
+        });
+      }
+
       // Remove background
       const cleanedData = removeBackground(cell.imageData);
 
       // Remove shadows along slice edges
       removeShadowsAlongSlices(cleanedData, [0, cell.height - 1], 3);
 
-      // Decompose into shapes
-      const shapes = decomposeIntoShapes(cleanedData);
+      // Trim transparent padding around the component
+      const trimResult = trimTransparentPadding(cleanedData);
 
-      // Calculate nine-slice borders
-      const nineSlice = calculateNineSliceBorders(cleanedData, shapes);
+      // Debug: log trim result
+      if (window.debug) {
+        window.debug.log(`Cell-${cell.row}-${cell.col} trim result`, {
+          isEmpty: trimResult.isEmpty,
+          originalSize: `${cell.width}x${cell.height}`,
+          trimmedSize: `${trimResult.bounds.width}x${trimResult.bounds.height}`,
+          trimmedBounds: trimResult.bounds
+        });
+      }
+
+      // Skip empty components (completely transparent or too small)
+      if (trimResult.isEmpty) {
+        if (window.debug) {
+          window.debug.log(`⚠️ Empty component detected: widget-${cell.row}-${cell.col}`);
+        }
+
+        // Still add it but mark as empty so UI can filter it
+        this.components.push({
+          id: cell.id,
+          name: `widget-${cell.row}-${cell.col}`,
+          type: cell.type,
+          row: cell.row,
+          col: cell.col,
+          sourceX: cell.x,
+          sourceY: cell.y,
+          width: 0,
+          height: 0,
+          imageData: trimResult.imageData,
+          originalImageData: originalCellData, // Store for modal re-processing
+          shapes: [],
+          nineSlice: null,
+          isEmpty: true
+        });
+        continue;
+      }
+
+      // Use trimmed imageData for shape analysis
+      const shapes = decomposeIntoShapes(trimResult.imageData);
+
+      // Calculate nine-slice borders on trimmed image
+      const nineSlice = calculateNineSliceBorders(trimResult.imageData, shapes);
 
       this.components.push({
         id: cell.id,
@@ -167,13 +222,15 @@ class ImageGridAnalyzer {
         type: cell.type,
         row: cell.row,
         col: cell.col,
-        sourceX: cell.x,
-        sourceY: cell.y,
-        width: cell.width,
-        height: cell.height,
-        imageData: cleanedData,
+        sourceX: cell.x + trimResult.bounds.x, // Adjust for trimming
+        sourceY: cell.y + trimResult.bounds.y, // Adjust for trimming
+        width: trimResult.bounds.width,        // Use trimmed width
+        height: trimResult.bounds.height,      // Use trimmed height
+        imageData: trimResult.imageData,       // Use trimmed imageData
+        originalImageData: originalCellData,   // Store for modal re-processing
         shapes: shapes.shapes,
-        nineSlice: nineSlice
+        nineSlice: nineSlice,
+        isEmpty: false
       });
     }
     const cellProcessDuration = performance.now() - cellProcessStartTime;
@@ -270,7 +327,9 @@ class ImageGridAnalyzer {
     return {
       pngBlobs,
       json: jsonOutput,
-      css: cssOutput
+      css: cssOutput,
+      gridConfig: this.gridConfig,
+      components: this.components
     };
   }
 }
